@@ -1,6 +1,3 @@
-cillybot-swing-analyse/
-├── .github/
-│   └── workflows/
-│       └── daily.yml      ← GitHub Action (siehe Schritt 4)
-├── main.py                ← Dein aktuelles Python-Skript
-└── requirements.txt       ← Liste der Pakete
+pandas
+numpy
+requests
