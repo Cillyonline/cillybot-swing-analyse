@@ -1,10 +1,8 @@
-pandas
-numpy
-requests
 # Swing-Trading Analyse-Tool (verwendet Google Sheet "CillyBot_SwingTradeWL" als Datenquelle)
 
 # Hinweis: Dieses Skript speichert die Ergebnisse lokal als CSV-Datei.
 
+import os
 import pandas as pd
 import numpy as np
 import datetime as dt
@@ -12,7 +10,8 @@ import requests
 import csv
 
 # Google Sheets als CSV-Quelle
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1MyH7AwYQNNu3fzboFDcnU/export?format=csv&gid=0"  # GID=0 für 'Assets'-Tab
+DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/1MyH7AwYQNNu3fzboFDcnU/export?format=csv&gid=0"  # GID=0 für 'Assets'-Tab
+SHEET_URL = os.environ.get("SHEET_URL", DEFAULT_SHEET_URL)
 
 # Technische Indikatoren (ohne externe Libraries)
 def ema(series, window):
@@ -82,9 +81,17 @@ def generate_signal(df):
         "Close": round(df['Close'].iloc[-1], 2)
     }
 
-# Watchlist direkt aus Google Sheet laden
-watchlist_df = pd.read_csv(SHEET_URL)
-watchlist = dict(zip(watchlist_df['Ticker'], watchlist_df['Name']))
+def load_watchlist(url=SHEET_URL):
+    try:
+        return pd.read_csv(url)
+    except Exception as e:
+        print(f"Fehler beim Laden der Watchlist von {url}: {e}")
+        return pd.DataFrame(columns=["Ticker", "Name"])
+
+
+# Watchlist direkt aus Google Sheet (oder lokal) laden
+watchlist_df = load_watchlist()
+watchlist = dict(zip(watchlist_df.get('Ticker', []), watchlist_df.get('Name', [])))
 
 # Analyse
 results = []
